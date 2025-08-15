@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Jaiswal Store Express — Quick Home Delivery</title>
+<link rel="preconnect" href="https://images.unsplash.com">
+<style>
+    :root{
+        --brand:#0fa86f;
+        --accent:#ffd166;
+        --muted:#6b7280;
+        --card-shadow: 0 6px 20px rgba(15,168,111,0.08);
+        --radius:12px;
+        --max-width:1100px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#f3fff6; margin:0; color:#07201b}
+    header{background:linear-gradient(90deg,var(--brand),#0bb37a); color:white; padding:18px 16px; text-align:center}
+    header h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .sub{font-size:13px;color:rgba(255,255,255,0.95); margin-top:6px}
+    .notice{background:#fffbe6;border:1px solid #fff0c2;color:#6b4b00;padding:10px;border-radius:10px;margin:14px auto;max-width:var(--max-width); display:flex;gap:12px;align-items:center}
+    .container{max-width:var(--max-width);margin:18px auto;padding:0 14px;display:grid;grid-template-columns:1fr 360px;gap:18px}
+    /* product grid */
+    .products{display:grid;grid-template-columns:repeat( auto-fit,minmax(190px,1fr) );gap:14px}
+    .product{
+        background:white;border-radius:var(--radius);padding:12px;box-shadow:var(--card-shadow);
+        display:flex;flex-direction:column;align-items:stretch;gap:10px;
+    }
+    .thumb{height:140px;border-radius:10px;overflow:hidden;background:#f0f3f1;display:flex;align-items:center;justify-content:center}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .p-title{font-weight:600;font-size:15px;margin:0}
+    .p-meta{color:var(--muted);font-size:13px}
+    .price-row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+    .sell{color:var(--brand);font-weight:700;font-size:16px}
+    .mrp{color:var(--muted);text-decoration:line-through;font-size:13px}
+    .btn{background:var(--brand);color:white;border:0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+    .btn:active{transform:translateY(1px)}
+    /* cart panel */
+    .cart-panel{background:white;border-radius:12px;padding:12px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;height:fit-content;position:sticky;top:20px}
+    .cart-panel h2{margin:0 0 8px 0;font-size:16px}
+    .cart-list{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;padding-right:6px}
+    .cart-item{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:#fbfffb;border:1px solid #f0fff2}
+    .ci-left{display:flex;gap:8px;align-items:center}
+    .ci-thumb{width:52px;height:52px;border-radius:8px;overflow:hidden;background:#f0f3f1}
+    .ci-thumb img{width:100%;height:100%;object-fit:cover}
+    .ci-info{font-size:13px}
+    .qty{display:inline-flex;align-items:center;gap:6px;background:white;border-radius:8px;padding:4px;border:1px solid #e6f3ea}
+    .qty button{background:transparent;border:0;padding:4px 6px;cursor:pointer;color:var(--brand);font-weight:700}
+    .totals{margin-top:10px;border-top:1px dashed #eef6ef;padding-top:10px;font-size:14px;display:flex;flex-direction:column;gap:6px}
+    .totals .row{display:flex;justify-content:space-between}
+    .place{margin-top:12px;display:flex;gap:8px;align-items:center}
+    .place .wa{flex:1;background:#25d366;color:white;padding:10px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    .place .reset{background:#f3f4f6;border-radius:10px;padding:8px;border:0;cursor:pointer}
+    /* checkout form inside cart panel */
+    .checkout{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+    .checkout input,.checkout textarea,.checkout select{padding:8px;border-radius:8px;border:1px solid #e6f0eb;font-size:14px}
+    .small{font-size:13px;color:var(--muted)}
+    footer{max-width:var(--max-width);margin:22px auto;padding:12px 14px;color:var(--muted);font-size:13px;text-align:center}
+    /* responsive: move cart under products on small screens */
+    @media (max-width:980px){
+        .container{grid-template-columns:1fr; padding:0 12px}
+        .cart-panel{position:relative;top:initial}
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Jaiswal Store Express</h1>
+    <div class="sub">Fast delivery within 1 km · Payments: Cash &amp; UPI</div>
+</header>
+
+<div class="notice" role="note">
+    <strong>📢 Delivery rule:</strong>
+    <div style="flex:1">Minimum order ₹249. Orders below ₹249 will have a ₹20 delivery charge.</div>
+    <div style="font-size:13px;color:var(--muted)">Delivery radius: 1 km</div>
+</div>
+
+<main class="container" role="main">
+    <!-- PRODUCTS -->
+    <section>
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:10px">
+            <div>
+                <h2 style="margin:0">Groceries & Snacks</h2>
+                <div class="small" style="margin-top:6px">Tap "Add" to add product to your cart</div>
+            </div>
+            <div class="small">No fruits — grocery & snack items only</div>
+        </div>
+
+        <div class="products" id="productsGrid">
+            <!-- JS will insert product cards -->
+        </div>
+    </section>
+
+    <!-- CART -->
+    <aside class="cart-panel" aria-labelledby="cart-heading">
+        <h2 id="cart-heading">🛒 Your Cart</h2>
+        <div class="cart-list" id="cartList">
+            <div class="small" style="color:var(--muted)">Cart is empty. Add items to begin.</div>
+        </div>
+
+        <div class="totals" id="totals" style="display:none">
+            <div class="row"><div class="small">Subtotal</div><div id="subtotal">₹0</div></div>
+            <div class="row"><div class="small">Delivery</div><div id="delivery">₹0</div></div>
+            <div class="row" style="font-weight:800;font-size:16px"><div>Total</div><div id="grand">₹0</div></div>
+        </div>
+
+        <div class="checkout">
+            <input id="custName" placeholder="Full name" />
+            <input id="custPhone" placeholder="Phone number" inputmode="tel"/>
+            <textarea id="custAddress" rows="2" placeholder="Delivery address (within 1 km)"></textarea>
+            <select id="paymentMode">
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="UPI">UPI (Pay & Confirm)</option>
+            </select>
+            <div class="small">UPI payments: choose UPI and pay to your UPI ID after placing order.</div>
+
+            <div class="place">
+                <button class="wa" id="placeOrderBtn">Send Order on WhatsApp</button>
+                <button class="reset" id="clearCartBtn" title="Clear cart">Clear</button>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<footer>Made for Jaiswal Store Express · Save this file and open in a browser. WhatsApp orders go to the owner.</footer>
+
+<script>
+/* Product list (no fruits). Each item: title, mrp, price, image */
+const PRODUCTS = [
+    { id: 'milk', title: 'Amul Milk (1L)', mrp: 35, price: 34, img: 'https://source.unsplash.com/featured/?milk,pack' },
+    { id: 'maggi', title: 'Maggi (2 pack)', mrp: 30, price: 30, img: 'https://source.unsplash.com/featured/?instant-noodles' },
+    { id: 'chips', title: 'Lays Chips (100g)', mrp: 20, price: 20, img: 'https://source.unsplash.com/featured/?chips,snack' },
+    { id: 'bread', title: 'Fresh Bread (400g)', mrp: 30, price: 30, img: 'https://source.unsplash.com/featured/?bread,slice' },
+    { id: 'muesli', title: "Kellogg's Muesli", mrp: 525, price: 450, img: 'https://source.unsplash.com/featured/?muesli,cereal' },
+    { id: 'besan', title: 'Besan (500g)', mrp: 78, price: 58, img: 'https://source.unsplash.com/featured/?besan,gram-flour' },
+    { id: 'aata', title: 'Nandi Aata (5kg)', mrp: 250, price: 199, img: 'https://source.unsplash.com/featured/?wheat-flour' },
+    { id: 'biscuit', title: "Mom's Magic Biscuit (Pack)", mrp: 45, price: 40, img: 'https://source.unsplash.com/featured/?biscuits,cookies' },
+    { id: 'cornflakes', title: 'Corn Flakes', mrp: 140, price: 130, img: 'https://source.unsplash.com/featured/?corn-flakes' },
+    { id: 'chocos', title: "Kellogg's Chocos", mrp: 235, price: 125, img: 'https://source.unsplash.com/featured/?chocos,cereal' }
+];
+
+/* App state */
+let cart = {}; // { productId: { ...product, qty } }
+const DELIVERY_THRESHOLD = 249;
+const DELIVERY_CHARGE = 20;
+const OWNER_WA = '919569554941'; // send to this WhatsApp (no +)
+
+const productsGrid = document.getElementById('productsGrid');
+const cartList = document.getElementById('cartList');
+const subtotalEl = document.getElementById('subtotal');
+const deliveryEl = document.getElementById('delivery');
+const grandEl = document.getElementById('grand');
+const totalsBox = document.getElementById('totals');
+const placeBtn = document.getElementById('placeOrderBtn');
+const clearBtn = document.getElementById('clearCartBtn');
+
+/* Render products */
+function renderProducts(){
+    productsGrid.innerHTML = '';
+    PRODUCTS.forEach(p=>{
+        const card = document.createElement('article');
+        card.className = 'product';
+        card.innerHTML = `
+            <div class="thumb"><img loading="lazy" src="${p.img}" alt="${escapeHtml(p.title)}"></div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;justify-content:space-between;align-items:start">
+                    <div>
+                        <div class="p-title">${escapeHtml(p.title)}</div>
+                        <div class="p-meta"><span class="mrp">₹${p.mrp}</span></div>
+                    </div>
+                    <div style="text-align:right">
+                        <div class="sell">₹${p.price}</div>
+                        <div style="margin-top:8px"><button class="btn" data-id="${p.id}">Add</button></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        productsGrid.appendChild(card);
+    });
+    // attach add handlers
+    document.querySelectorAll('.product .btn').forEach(b=>{
+        b.addEventListener('click', ()=> addToCart(b.dataset.id));
+    });
+}
+
+/* Cart actions */
+function addToCart(id){
+    const prod = PRODUCTS.find(p=>p.id===id);
+    if(!prod) return;
+    if(!cart[id]) cart[id] = {...prod, qty:0};
+    cart[id].qty++;
+    saveToLocal();
+    renderCart();
+}
+function changeQty(id, delta){
+    if(!cart[id]) return;
+    cart[id].qty += delta;
+    if(cart[id].qty <= 0) delete cart[id];
+    saveToLocal();
+    renderCart();
+}
+function removeItem(id){
+    if(cart[id]) delete cart[id];
+    saveToLocal();
+    renderCart();
+}
+function clearCart(){
+    cart = {};
+    saveToLocal();
+    renderCart();
+}
+
+/* render cart UI */
+function renderCart(){
+    cartList.innerHTML = '';
+    const items = Object.values(cart);
+    if(items.length === 0){
+        cartList.innerHTML = '<div class="small" style="color:var(--muted)">Cart is empty. Add items to begin.</div>';
+        totalsBox.style.display = 'none';
+        return;
+    }
+    totalsBox.style.display = 'block';
+    items.forEach(it=>{
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+            <div class="ci-left">
+                <div class="ci-thumb"><img src="${it.img}" alt="${escapeHtml(it.title)}"></div>
+                <div class="ci-info">
+                    <div style="font-weight:600">${escapeHtml(it.title)}</div>
+                    <div class="small">₹${it.price} × ${it.qty} = ₹${it.price * it.qty}</div>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+                <div class="qty">
+                    <button aria-label="decrease" data-id="${it.id}" class="dec">-</button>
+                    <div style="padding:0 6px;font-weight:700">${it.qty}</div>
+                    <button aria-label="increase" data-id="${it.id}" class="inc">+</button>
+                </div>
+                <button style="background:transparent;border:0;color:#e33;cursor:pointer;font-size:13px" data-id="${it.id}" class="rm">Remove</button>
+            </div>
+        `;
+        cartList.appendChild(div);
+    });
+
+    // attach qty handlers
+    document.querySelectorAll('.inc').forEach(b => b.onclick = e => changeQty(b.dataset.id, 1));
+    document.querySelectorAll('.dec').forEach(b => b.onclick = e => changeQty(b.dataset.id, -1));
+    document.querySelectorAll('.rm').forEach(b => b.onclick = e => removeItem(b.dataset.id));
+
+    // totals
+    const subtotal = items.reduce((s,i)=>s + i.price * i.qty, 0);
+    const delivery = (subtotal > 0 && subtotal < DELIVERY_THRESHOLD) ? DELIVERY_CHARGE : 0;
+    const grand = subtotal + delivery;
+    subtotalEl.textContent = `₹${subtotal}`;
+    deliveryEl.textContent = `₹${delivery}`;
+    grandEl.textContent = `₹${grand}`;
+}
+
+/* Place order -> open WhatsApp with filled text */
+function placeOrder(){
+    const items = Object.values(cart);
+    if(items.length === 0){ alert('Cart is empty — add items first.'); return; }
+    const name = (document.getElementById('custName').value || '').trim();
+    const phone = (document.getElementById('custPhone').value || '').trim();
+    const address = (document.getElementById('custAddress').value || '').trim();
+    const payment = document.getElementById('paymentMode').value;
+
+    if(!name || !phone || !address){
+        alert('Please enter name, phone and address to place the order.');
+        return;
+    }
+
+    const subtotal = items.reduce((s,i)=>s + i.price * i.qty, 0);
+    const delivery = (subtotal > 0 && subtotal < DELIVERY_THRESHOLD) ? DELIVERY_CHARGE : 0;
+    const grand = subtotal + delivery;
+
+    // Build order message (line breaks encoded as %0A)
+    let txt = `🛒 *New order - Jaiswal Store Express*%0A`;
+    txt += `*Customer:* ${encodeURIComponent(name)}%0A`;
+    txt += `*Phone:* ${encodeURIComponent(phone)}%0A`;
+    txt += `*Address:* ${encodeURIComponent(address)}%0A`;
+    txt += `*Payment:* ${encodeURIComponent(payment)}%0A%0A`;
+    txt += `*Items:*%0A`;
+    items.forEach(i => {
+        txt += `- ${encodeURIComponent(i.title)} x${i.qty} = ₹${i.price * i.qty}%0A`;
+    });
+    txt += `%0A*Subtotal:* ₹${subtotal}%0A`;
+    txt += `*Delivery:* ₹${delivery}%0A`;
+    txt += `*Grand Total:* ₹${grand}%0A%0A`;
+    txt += `_Order placed from web store_`;
+
+    // Compose wa.me URL
+    const wa = `https://wa.me/${OWNER_WA}?text=${txt}`;
+    // Open new tab for WhatsApp web / app
+    window.open(wa, '_blank');
+
+    // Show a quick confirmation UI and clear cart (optional)
+    alert('WhatsApp will open with the order message. After sending, you can clear the cart.');
+}
+
+/* Local storage to persist cart across refreshes */
+function saveToLocal(){ localStorage.setItem('jaiswal_cart_v1', JSON.stringify(cart)); }
+function loadFromLocal(){ try{ const d = JSON.parse(localStorage.getItem('jaiswal_cart_v1')||'{}'); cart = d || {}; }catch(e){ cart={}; } }
+
+/* small helpers */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* init */
+loadFromLocal();
+renderProducts();
+renderCart();
+
+/* handlers */
+placeBtn.addEventListener('click', placeOrder);
+clearBtn.addEventListener('click', ()=>{
+    if(confirm('Clear the cart?')) clearCart();
+});
+</script>
+</body>
+</html>
